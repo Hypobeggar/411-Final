@@ -20,7 +20,7 @@ public class Tickets extends JFrame implements ActionListener {
 
 	// class level member objects
 	Dao dao = new Dao(); // for CRUD operations
-	Boolean chkIfAdmin = null;
+	static Boolean chkIfAdmin = null;
 
 	// Main menu object items
 	private JMenu mnuFile = new JMenu("File");
@@ -33,6 +33,7 @@ public class Tickets extends JFrame implements ActionListener {
 	JMenuItem mnuItemDelete;
 	JMenuItem mnuItemOpenTicket;
 	JMenuItem mnuItemViewTicket;
+	JMenuItem mnuItemCloseTicket;
 
 	public Tickets(Boolean isAdmin) {
 
@@ -72,6 +73,10 @@ public class Tickets extends JFrame implements ActionListener {
 		mnuTickets.add(mnuItemViewTicket);
 
 		// initialize any more desired sub menu items below
+		mnuItemCloseTicket = new JMenuItem("Close Ticket");
+		// add to Ticket Main menu item
+		mnuTickets.add(mnuItemCloseTicket);
+		
 
 		/* Add action listeners for each desired menu item *************/
 		mnuItemExit.addActionListener(this);
@@ -79,7 +84,7 @@ public class Tickets extends JFrame implements ActionListener {
 		mnuItemDelete.addActionListener(this);
 		mnuItemOpenTicket.addActionListener(this);
 		mnuItemViewTicket.addActionListener(this);
-
+		mnuItemCloseTicket.addActionListener(this);
 		 /*
 		  * continue implementing any other desired sub menu items (like 
 		  * for update and delete sub menus for example) with similar 
@@ -94,6 +99,7 @@ public class Tickets extends JFrame implements ActionListener {
 		// create JMenu bar
 		JMenuBar bar = new JMenuBar();
 		bar.add(mnuFile); // add main menu items in order, to JMenuBar
+		if (chkIfAdmin)
 		bar.add(mnuAdmin);
 		bar.add(mnuTickets);
 		// add menu bar components to frame
@@ -120,7 +126,7 @@ public class Tickets extends JFrame implements ActionListener {
 		} else if (e.getSource() == mnuItemOpenTicket) {
 
 			// get ticket information
-			String ticketName = JOptionPane.showInputDialog(null, "Enter your name");
+			String ticketName = Login.username;
 			String ticketDesc = JOptionPane.showInputDialog(null, "Enter a ticket description");
 
 			// insert ticket information to database
@@ -128,14 +134,13 @@ public class Tickets extends JFrame implements ActionListener {
 			int id = dao.insertRecords(ticketName, ticketDesc);
 
 			// display results if successful or not to console / dialog box
-			if (id != 0) {
-				System.out.println("Ticket ID : " + id + " created successfully!!!");
-				JOptionPane.showMessageDialog(null, "Ticket id: " + id + " created");
-			} else
-				System.out.println("Ticket cannot be created!!!");
-		}
-
-		else if (e.getSource() == mnuItemViewTicket) {
+				if (id != 0) {
+					System.out.println("Ticket ID: " + id + " created successfully!!!");
+					JOptionPane.showMessageDialog(null, "Ticket id: " + id + " created");
+				} else
+					System.out.println("Ticket cannot be created!!!");
+				// View ticket
+		}	else if (e.getSource() == mnuItemViewTicket) {
 
 			// retrieve all tickets details for viewing in JTable
 			try {
@@ -151,7 +156,36 @@ public class Tickets extends JFrame implements ActionListener {
 			} catch (SQLException e1) {
 				e1.printStackTrace();
 			}
+			// Close ticket
+		}	else if (e.getSource() == mnuItemCloseTicket) {
+			int id = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter the ticket number you would like to close"));
+			dao.closeRecords(id);
+			// Delete ticket
+		}	else if (e.getSource() == mnuItemDelete) {
+			int id = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter the ticket number you would like to delete"));
+			int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete Ticket ID: " + id + "?", null, JOptionPane.YES_NO_OPTION);
+			if (confirm == 0) 
+			dao.deleteRecords(id);
+		}	else if (e.getSource() == mnuItemUpdate) {
+			String desc = "";
+			String item = "";
+			int id = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter the ticket number you would like to update"));
+			
+			Object[] options = { "Description", "Reopen a ticket" };
+			int answer = JOptionPane.showOptionDialog(null, "Would you like to change the description or reopen a case?", "", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+			if (answer == 0)
+				item = "desc";
+			
+			if (answer == 1)
+				item = "reopen";
+			
+			if (item == "desc")
+				desc = JOptionPane.showInputDialog(null, "Enter the new description");
+
+			dao.updateRecords(item, desc, id);
+			
 		}
+		
 		/*
 		 * continue implementing any other desired sub menu items (like for update and
 		 * delete sub menus for example) with similar syntax & logic as shown above

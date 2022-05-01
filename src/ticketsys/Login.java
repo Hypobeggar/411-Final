@@ -18,6 +18,7 @@ import javax.swing.JTextField;
 public class Login extends JFrame {
 
 	Dao conn;
+	static String username;
 
 	public Login() {
 
@@ -65,10 +66,11 @@ public class Login extends JFrame {
 				count = count + 1;
 				// verify credentials of user (MAKE SURE TO CHANGE TO YOUR TABLE NAME BELOW)
 
-				String query = "SELECT * FROM zwats_users WHERE uname = ? and upass = ?;";
+				String query = "SELECT * FROM zwats1_users WHERE uname = ? and upass = ?;";
 				try (PreparedStatement stmt = conn.getConnection().prepareStatement(query)) {
 					stmt.setString(1, txtUname.getText());
 					stmt.setString(2, txtPassword.getText());
+					username = txtUname.getText();
 					ResultSet rs = stmt.executeQuery();
 					if (rs.next()) {
 						admin = rs.getBoolean("admin"); // get table column value

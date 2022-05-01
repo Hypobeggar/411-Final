@@ -37,8 +37,16 @@ public class Dao {
 
 	public void createTables() {
 		// variables for SQL Query table creations
-		final String createTicketsTable = "CREATE TABLE zwats_tickets(ticket_id INT AUTO_INCREMENT PRIMARY KEY, ticket_issuer VARCHAR(30), ticket_description VARCHAR(200), start_date VARCHAR(50), end_date VARCHAR(50))";
-		final String createUsersTable = "CREATE TABLE zwats_users(uid INT AUTO_INCREMENT PRIMARY KEY, uname VARCHAR(30), upass VARCHAR(30), admin int)";
+		final String createTicketsTable = "CREATE TABLE zwats1_tickets("
+				+ "ticket_id INT AUTO_INCREMENT PRIMARY KEY,"
+				+ " ticket_issuer VARCHAR(30), ticket_description VARCHAR(200),"
+				+ " start_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
+				+ " end_date TIMESTAMP NULL)";
+		final String createUsersTable = "CREATE TABLE zwats1_users("
+				+ "uid INT AUTO_INCREMENT PRIMARY KEY,"
+				+ " uname VARCHAR(30),"
+				+ " upass VARCHAR(30),"
+				+ " admin int)";
 
 		try {
 
@@ -93,7 +101,7 @@ public class Dao {
 			// and PASS (insert) that data into your User table
 			for (List<String> rowData : array) {
 
-				sql = "insert into zwats_users(uname,upass,admin) " + "values('" + rowData.get(0) + "'," + " '"
+				sql = "insert into zwats1_users(uname,upass,admin) " + "values('" + rowData.get(0) + "'," + " '"
 						+ rowData.get(1) + "','" + rowData.get(2) + "');";
 				statement.executeUpdate(sql);
 			}
@@ -111,7 +119,7 @@ public class Dao {
 		int id = 0;
 		try {
 			statement = getConnection().createStatement();
-			statement.executeUpdate("Insert into zwats_tickets" + "(ticket_issuer, ticket_description) values(" + " '"
+			statement.executeUpdate("Insert into zwats1_tickets" + "(ticket_issuer, ticket_description) values(" + " '"
 					+ ticketName + "','" + ticketDesc + "')", Statement.RETURN_GENERATED_KEYS);
 
 			// retrieve ticket id number newly auto generated upon record insertion
@@ -123,7 +131,6 @@ public class Dao {
 			}
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return id;
@@ -135,7 +142,12 @@ public class Dao {
 		ResultSet results = null;
 		try {
 			statement = connect.createStatement();
-			results = statement.executeQuery("SELECT * FROM zwats_tickets");
+			if (Tickets.chkIfAdmin) {
+				results = statement.executeQuery("SELECT * FROM zwats1_tickets");
+			} else {
+				results = statement.executeQuery("SELECT * FROM zwats1_tickets WHERE ticket_issuer = '" + Login.username + "'");
+			}
+			
 			//connect.close();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
@@ -143,11 +155,86 @@ public class Dao {
 		return results;
 	}
 	// continue coding for updateRecords implementation
-	public void updateRecords() {
+	public void updateRecords(String item, String desc, int id) {
+		try {
+			statement = connect.createStatement();
+			if (item == "desc") {
+				// catch exceptions
+				try {
+					if (Tickets.chkIfAdmin) {
+						statement.executeUpdate("UPDATE zwats1_tickets SET ticket_description = '" + desc + "' WHERE ticket_id = " + id);
+					} else {
+						
+						
+						statement.executeUpdate("UPDATE zwats1_tickets "
+								+ "SET ticket_description = '" + desc + "'" + 
+								"WHERE ticket_issuer = '" + Login.username + "' AND ticket_id = " + id);
+						
+					}
+				}	catch (SQLException e) {
+					System.out.println("An error has occured");
+					System.out.println(e.getMessage());
+				}
+				
+			}	else if ( item == "reopen")	{
+				try {
+					if (Tickets.chkIfAdmin) {
+						statement.executeUpdate("UPDATE zwats1_tickets SET end_date = NULL WHERE ticket_id = " + id);
+					} else {
+						
+						
+						statement.executeUpdate("UPDATE zwats1_tickets "
+								+ "SET end_date = NULL" + 
+								"WHERE ticket_issuer = '" + Login.username + "' AND ticket_id = " + id);
+						
+					}
+				}	catch (SQLException e) {
+					System.out.println("An error has occured");
+					System.out.println(e.getMessage());
+				}
+			}
+			
+			
+			if (Tickets.chkIfAdmin) {
+				statement.executeUpdate("UPDATE zwats1_tickets SET end_date = NULL");
+			} else {
+				statement.executeUpdate("UPDATE zwats1_tickets "
+						+ "SET WHERE ticket_issuer = '" + Login.username + "' AND ticket_id = " + id);
+			}
+			statement.close();
+			connect.close();
+		} catch (SQLException e1) {
+			System.out.println(e1.getMessage());
+			e1.printStackTrace();
+		}
 		
 	}
 	// continue coding for deleteRecords implementation
-	public void deletRecords() {
+	public void deleteRecords(int ticketNum) {
+		try {
+			statement = connect.createStatement();
+			statement.executeUpdate("DELETE FROM zwats1_tickets WHERE ticket_id = " + ticketNum);
+			System.out.println("Ticket ID: " + ticketNum + " has been deleted successfully.");
+			// close connection/statement object
+			statement.close();
+			connect.close();
+		} 
+		catch  (SQLException e) {
+			System.out.println("An error has occured");
+			e.printStackTrace();
+			
+		}
 		
 	}
+	public void closeRecords(int ticketNum) {
+		try {
+			statement = connect.createStatement();
+			statement.executeUpdate("UPDATE zwats1_tickets SET end_date = CURRENT_TIMESTAMP WHERE ticket_id = " + ticketNum);
+			System.out.println("Ticket ID " + ticketNum + " has been closed successfully");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+
 }
