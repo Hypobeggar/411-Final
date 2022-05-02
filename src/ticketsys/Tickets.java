@@ -173,8 +173,8 @@ public class Tickets extends JFrame implements ActionListener {
 			
 			Object[] options = { "Description", "Reopen a ticket" };
 			int answer = JOptionPane.showOptionDialog(null, "Would you like to change the description or reopen a case?", "", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-			if (answer == 0)
-				item = "desc";
+
+			if (answer == 0)				item = "desc";
 			
 			if (answer == 1)
 				item = "reopen";

@@ -37,15 +37,15 @@ public class Dao {
 
 	public void createTables() {
 		// variables for SQL Query table creations
-		final String createTicketsTable = "CREATE TABLE zwats1_tickets("
+		final String createTicketsTable = "CREATE TABLE zwats2_tickets("
 				+ "ticket_id INT AUTO_INCREMENT PRIMARY KEY,"
-				+ " ticket_issuer VARCHAR(30), ticket_description VARCHAR(200),"
+				+ " ticket_opener VARCHAR(30), ticket_description VARCHAR(200),"
 				+ " start_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,"
-				+ " end_date TIMESTAMP NULL)";
-		final String createUsersTable = "CREATE TABLE zwats1_users("
+				+ " close_date TIMESTAMP NULL)";
+		final String createUsersTable = "CREATE TABLE zwats2_users("
 				+ "uid INT AUTO_INCREMENT PRIMARY KEY,"
-				+ " uname VARCHAR(30),"
-				+ " upass VARCHAR(30),"
+				+ " username VARCHAR(30),"
+				+ " password VARCHAR(30),"
 				+ " admin int)";
 
 		try {
@@ -60,7 +60,7 @@ public class Dao {
 
 			// end create table
 			// close connection/statement object
-			statement.close();
+			//statement.close();
 			connect.close();
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -78,7 +78,7 @@ public class Dao {
 		Statement statement;
 		BufferedReader br;
 		List<List<String>> array = new ArrayList<>(); // list to hold (rows & cols)
-
+		
 		// read data from file
 		try {
 			br = new BufferedReader(new FileReader(new File("./userlist.csv")));
@@ -101,14 +101,14 @@ public class Dao {
 			// and PASS (insert) that data into your User table
 			for (List<String> rowData : array) {
 
-				sql = "insert into zwats1_users(uname,upass,admin) " + "values('" + rowData.get(0) + "'," + " '"
+				sql = "insert into zwats2_users(username,password,admin) " + "values('" + rowData.get(0) + "'," + " '"
 						+ rowData.get(1) + "','" + rowData.get(2) + "');";
 				statement.executeUpdate(sql);
 			}
 			System.out.println("Inserts completed in the given database...");
 
 			// close statement object
-			statement.close();
+			//statement.close();
 
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -119,7 +119,7 @@ public class Dao {
 		int id = 0;
 		try {
 			statement = getConnection().createStatement();
-			statement.executeUpdate("Insert into zwats1_tickets" + "(ticket_issuer, ticket_description) values(" + " '"
+			statement.executeUpdate("Insert into zwats2_tickets" + "(ticket_opener, ticket_description) values(" + " '"
 					+ ticketName + "','" + ticketDesc + "')", Statement.RETURN_GENERATED_KEYS);
 
 			// retrieve ticket id number newly auto generated upon record insertion
@@ -143,9 +143,9 @@ public class Dao {
 		try {
 			statement = connect.createStatement();
 			if (Tickets.chkIfAdmin) {
-				results = statement.executeQuery("SELECT * FROM zwats1_tickets");
+				results = statement.executeQuery("SELECT * FROM zwats2_tickets");
 			} else {
-				results = statement.executeQuery("SELECT * FROM zwats1_tickets WHERE ticket_issuer = '" + Login.username + "'");
+				results = statement.executeQuery("SELECT * FROM zwats2_tickets WHERE ticket_opener = '" + Login.username + "'");
 			}
 			
 			//connect.close();
@@ -162,13 +162,14 @@ public class Dao {
 				// catch exceptions
 				try {
 					if (Tickets.chkIfAdmin) {
-						statement.executeUpdate("UPDATE zwats1_tickets SET ticket_description = '" + desc + "' WHERE ticket_id = " + id);
+						statement.executeUpdate("UPDATE zwats2_tickets SET ticket_description = '" + desc + "' WHERE ticket_id = " + id);
+
 					} else {
 						
 						
-						statement.executeUpdate("UPDATE zwats1_tickets "
+						statement.executeUpdate("UPDATE zwats2_tickets "
 								+ "SET ticket_description = '" + desc + "'" + 
-								"WHERE ticket_issuer = '" + Login.username + "' AND ticket_id = " + id);
+								"WHERE ticket_opener = '" + Login.username + "' AND ticket_id = " + id);
 						
 					}
 				}	catch (SQLException e) {
@@ -179,13 +180,13 @@ public class Dao {
 			}	else if ( item == "reopen")	{
 				try {
 					if (Tickets.chkIfAdmin) {
-						statement.executeUpdate("UPDATE zwats1_tickets SET end_date = NULL WHERE ticket_id = " + id);
+						statement.executeUpdate("UPDATE zwats2_tickets SET close_date = NULL WHERE ticket_id = " + id);
 					} else {
 						
 						
-						statement.executeUpdate("UPDATE zwats1_tickets "
-								+ "SET end_date = NULL" + 
-								"WHERE ticket_issuer = '" + Login.username + "' AND ticket_id = " + id);
+						statement.executeUpdate("UPDATE zwats2_tickets "
+								+ "SET close_date = NULL" + 
+								"WHERE ticket_opener = '" + Login.username + "' AND ticket_id = " + id);
 						
 					}
 				}	catch (SQLException e) {
@@ -196,13 +197,13 @@ public class Dao {
 			
 			
 			if (Tickets.chkIfAdmin) {
-				statement.executeUpdate("UPDATE zwats1_tickets SET end_date = NULL");
+				statement.executeUpdate("UPDATE zwats2_tickets SET close_date = NULL");
 			} else {
-				statement.executeUpdate("UPDATE zwats1_tickets "
-						+ "SET WHERE ticket_issuer = '" + Login.username + "' AND ticket_id = " + id);
+				statement.executeUpdate("UPDATE zwats2_tickets "
+						+ "SET WHERE ticket_opener = '" + Login.username + "' AND ticket_id = " + id);
 			}
-			statement.close();
-			connect.close();
+			//statement.close();
+			//connect.close();
 		} catch (SQLException e1) {
 			System.out.println(e1.getMessage());
 			e1.printStackTrace();
@@ -213,11 +214,11 @@ public class Dao {
 	public void deleteRecords(int ticketNum) {
 		try {
 			statement = connect.createStatement();
-			statement.executeUpdate("DELETE FROM zwats1_tickets WHERE ticket_id = " + ticketNum);
+			statement.executeUpdate("DELETE FROM zwats2_tickets WHERE ticket_id = " + ticketNum);
 			System.out.println("Ticket ID: " + ticketNum + " has been deleted successfully.");
 			// close connection/statement object
-			statement.close();
-			connect.close();
+			//statement.close();
+			//connect.close();
 		} 
 		catch  (SQLException e) {
 			System.out.println("An error has occured");
@@ -229,7 +230,7 @@ public class Dao {
 	public void closeRecords(int ticketNum) {
 		try {
 			statement = connect.createStatement();
-			statement.executeUpdate("UPDATE zwats1_tickets SET end_date = CURRENT_TIMESTAMP WHERE ticket_id = " + ticketNum);
+			statement.executeUpdate("UPDATE zwats2_tickets SET close_date = CURRENT_TIMESTAMP WHERE ticket_id = " + ticketNum);
 			System.out.println("Ticket ID " + ticketNum + " has been closed successfully");
 		} catch (SQLException e) {
 			e.printStackTrace();
