@@ -161,6 +161,7 @@ public class Dao {
 			if (item == "desc") {
 				// catch exceptions
 				try {
+					// for changing description
 					if (Tickets.chkIfAdmin) {
 						statement.executeUpdate("UPDATE zwats2_tickets SET ticket_description = '" + desc + "' WHERE ticket_id = " + id);
 
@@ -177,7 +178,8 @@ public class Dao {
 					System.out.println(e.getMessage());
 				}
 				
-			}	else if ( item == "reopen")	{
+			}	// to reopen tickets
+				else if ( item == "reopen")	{
 				try {
 					if (Tickets.chkIfAdmin) {
 						statement.executeUpdate("UPDATE zwats2_tickets SET close_date = NULL WHERE ticket_id = " + id);

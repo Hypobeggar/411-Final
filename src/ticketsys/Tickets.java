@@ -166,15 +166,18 @@ public class Tickets extends JFrame implements ActionListener {
 			int confirm = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete Ticket ID: " + id + "?", null, JOptionPane.YES_NO_OPTION);
 			if (confirm == 0) 
 			dao.deleteRecords(id);
+			// Update Ticket
 		}	else if (e.getSource() == mnuItemUpdate) {
 			String desc = "";
 			String item = "";
+			// get id
 			int id = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter the ticket number you would like to update"));
 			
 			Object[] options = { "Description", "Reopen a ticket" };
 			int answer = JOptionPane.showOptionDialog(null, "Would you like to change the description or reopen a case?", "", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-			if (answer == 0)				item = "desc";
+			// update records parameters
+			if (answer == 0)				
+				item = "desc";
 			
 			if (answer == 1)
 				item = "reopen";
